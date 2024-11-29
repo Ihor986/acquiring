@@ -3,6 +3,7 @@ from i_data_class import IApiData
 import requests
 
 
+
 class GoogleMapsApiData(IApiData):
     
     WALK_MODE = 'walking'
