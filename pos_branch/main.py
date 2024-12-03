@@ -13,10 +13,11 @@ print(f'start: {start.strftime("%X")}')
 api_data_class = FreeSourceData()
 
 
-branches = pd.read_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\branches_ukr.csv', sep=';', index_col=False)
-terminals = pd.read_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\terminals_dnipro.csv', sep=';', index_col=False, nrows=20)
-address_df = pd.read_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\address_df.csv', sep=';', index_col=False)
-nearest_df = pd.read_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\nearest_df.csv', sep=';', index_col=False)
+
+branches = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\branches_ukr.csv', sep=';', index_col=False)
+terminals = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\terminals_ukr.csv', sep=';', index_col=False, nrows=20)
+address_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\address_df.csv', sep=';', index_col=False)
+nearest_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\nearest_df.csv', sep=';', index_col=False)
 # address_df = None
 # nearest_df = None
 
@@ -29,10 +30,10 @@ workclass.add_nearest_branch(100, 10)
 workclass.add_nearest_path_branch()
 workclass.visualize_branches_and_terminals()
 
-# workclass.map.save('my_map_test.html')
-# workclass.terminals.to_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\terminals_test.csv', sep=';', index=False)
-# workclass.address_df.to_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\address_df_test.csv', sep=';', index=False)
-# workclass.nearest_df.to_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\nearest_df_test.csv', sep=';', index=False)
+# workclass.map.save('D:\\резюме\\райф\\acquiring_data\\result\\html\\my_map_test.html')
+# workclass.terminals.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\csv\\terminals_test.csv', sep=';', index=False)
+# workclass.address_df.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\csv\\address_df_test.csv', sep=';', index=False)
+# workclass.nearest_df.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\csv\\nearest_df_test.csv', sep=';', index=False)
 
 print(workclass.branches)
 print(workclass.terminals)

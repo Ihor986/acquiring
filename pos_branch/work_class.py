@@ -19,6 +19,7 @@ class WorkClass:
         print('__init__ WorkClass ... ')
         self.start_time = time.time()
         self._nearest_path_num: int = 0
+        self._coordinates_num: int = 0
         
         self._map: folium.Map = folium.Map()
         self._geo_data: GeoData = geo_data
@@ -85,6 +86,9 @@ class WorkClass:
             lat = cache_row['lat']
             lng = cache_row['lng']
             adrs = cache_row['adrs']
+            
+            self._coordinates_num += 1
+            print(adrs,'\n', self._coordinates_num)
             return lat, lng, adrs
         
         lat, lng, adrs = self.geo_data.get_coordinates(address)
@@ -95,11 +99,13 @@ class WorkClass:
             'adrs': adrs
         }
         self._address_df = pd.concat([self._address_df, pd.DataFrame([new_cache_row])], ignore_index=True)
+        self._coordinates_num += 1
+        print(adrs,'\n', self._coordinates_num)
         return lat, lng, adrs
         
         
     def add_nearest_branch(self, target_distance: int, target_branch_count: int):
-        self._terminals[['nearest_id', 'distance', 'close_points', 'close_coordinates']] = (
+        self._terminals[['nearest_id', 'distance', 'nearest_coord', 'close_points', 'close_coordinates']] = (
             self._terminals.apply(lambda row: pd.Series(self._find_nearest(row, target_distance, target_branch_count), dtype='str'), axis=1)
             )
         
@@ -120,7 +126,7 @@ class WorkClass:
                 for num in close_points.keys()
             }
             
-            return nearest_id, nearest_distance, close_points , close_coordinates
+            return nearest_id, nearest_distance, close_points , close_coordinates, close_coordinates[nearest_id]
         
         except Exception as e:
             print('_find_nearest: \n', e)
@@ -175,8 +181,13 @@ class WorkClass:
         self.start_time = time.time()
         return values
     
+    def finalize_columns(self):
+        self._terminals = pd.merge(self.terminals, self.branches, left_on="nearest_id", right_on="num",  how="left", suffixes=("", "_branch"))
+        self._terminals['tech_num'] = '1'
+        print(self.terminals.columns)
     
-    def visualize_branches_and_terminals(self):
+    
+    def visualize_branches_and_terminals(self, closest_coordinates:str = 'closest_path_coordinates'):
 
         # Центр карти — середні координати всіх точок
         avg_lat = (self.branches["lat"].mean() + self.terminals["lat"].mean()) / 2
@@ -187,10 +198,10 @@ class WorkClass:
         for _, terminal in self.terminals.iterrows():
             
             try:
-                closest_branch_coords = json.loads(f"{terminal['closest_path_coordinates']}")
+                closest_branch_coords = json.loads(f"{terminal[closest_coordinates]}")
             except:
-                closest_branch_coords = terminal['closest_path_coordinates']
-                print(terminal['closest_path_coordinates'])
+                closest_branch_coords = terminal[closest_coordinates]
+                print(terminal[closest_coordinates])
                 
             try:
                 if isinstance(closest_branch_coords, list) and len(closest_branch_coords) == 2: 
