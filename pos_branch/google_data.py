@@ -1,5 +1,5 @@
 from typing import Union
-from i_data_class import IApiData
+from pos_branch.models.i_data_class import IApiData
 import requests
 
 
