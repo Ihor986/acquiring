@@ -1,14 +1,16 @@
 import math
 from models.i_data_class import IApiData
+from models.i_coordinates import ICoordinates
 
 class GeoData:
     
-    def __init__(self, api_data_class) -> None:
+    def __init__(self, api_data_class, coordinates_class) -> None:
         print('__init__ GeoData ... ')
         self.api_data_class: IApiData = api_data_class
+        self.coordinates_class: ICoordinates = coordinates_class
     
     def get_coordinates(self, address: str):
-        return self.api_data_class.get_coordinates(address)
+        return self.coordinates_class.get_coordinates(address)
     
     def get_distances_matrix_path(self, terminal_coords, branch_coords_list):
         return self.api_data_class.get_distances_matrix_path(terminal_coords, branch_coords_list)   

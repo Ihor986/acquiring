@@ -1,33 +1,41 @@
 from geo_data import GeoData
 from work_class import WorkClass, CLMS
 import pandas as pd
-from google_data import GoogleMapsApiData
-from free_source_data import FreeSourceData
+from google_data import GoogleMapsMatrixDistance, GoogleCoordinates
+from free_source_data import FreeSourceMatrixDistance, FreeSourceCoordinates
 from datetime import datetime
 import time
 
 start = datetime.now()
 print(f'start: {start.strftime("%X")}')
 clms = CLMS()
-# api_data_class = GoogleMapsApiData()
-api_data_class = FreeSourceData()
+# api_data_class = GoogleMapsMatrixDistance()
+api_data_class = FreeSourceMatrixDistance()
+# api_coordinates = GoogleCoordinates()
+api_coordinates = FreeSourceCoordinates()
 
 
 
-branches = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\branches_ukr.csv', sep=';', index_col=False)
-terminals = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\terminals_ukr.csv', sep=';', index_col=False, nrows=20)
-address_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\address_df.csv', sep=';', index_col=False)
-nearest_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\nearest_df.csv', sep=';', index_col=False)
-# address_df = None
-# nearest_df = None
+branches = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\branches_ukr.csv', sep=';', index_col=False, nrows=5)
+terminals = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\terminals_ukr.csv', sep=';', index_col=False, nrows=5)
+# address_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\address_df.csv', sep=';', index_col=False)
+# nearest_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\nearest_df.csv', sep=';', index_col=False)
+address_df = None
+nearest_df = None
 
-geo_data:GeoData = GeoData(api_data_class)
+geo_data:GeoData = GeoData(api_data_class, api_coordinates)
 workclass = WorkClass(clms=clms, branches=branches, terminals=terminals, geo_data=geo_data, addres_df=address_df, nearest_df=nearest_df)
 
 workclass.add_branches_coordinates()
 workclass.add_terminals_coordinates()
 workclass.add_nearest_branch(100, 10)
 workclass.add_nearest_path_branch()
+
+print(workclass.branches)
+print(workclass.terminals)
+# print(workclass.address_df)
+# print(workclass.nearest_df)
+
 workclass.visualize_branches_and_terminals()
 
 workclass.map.save('D:\\резюме\\райф\\acquiring_data\\result\\html\\my_map_test.html')
@@ -35,13 +43,6 @@ workclass.terminals.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\
 # workclass.address_df.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\csv\\address_df_test.csv', sep=';', index=False)
 # workclass.nearest_df.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\csv\\nearest_df_test.csv', sep=';', index=False)
 
-print(workclass.branches)
-print(workclass.terminals)
-# print(workclass.address_df)
-# print(workclass.nearest_df)
-
-count_google_requests = api_data_class.count_requests if isinstance(api_data_class, GoogleMapsApiData) else 0
-print(f'{count_google_requests=}')
 print((datetime.now()-start))
 
 

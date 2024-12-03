@@ -1,40 +1,38 @@
 from typing import Union
 from models.i_data_class import IApiData
+from models.i_coordinates import ICoordinates
 import requests
 
-
-
-class GoogleMapsApiData(IApiData):
+class GoogleMapsApi:
     
     WALK_MODE = 'walking'
     DRIVE_MODE = 'driving'
+    count_requests: int = 0
+    count_requests_limit: int = float('inf')
     
-    def __init__(self, requests_limit: Union[int, float] = float('inf')) -> None:
-        print('__init__ GoogleMapsApiData ... ')
-        self._api_key: str = '...'
+    def __init__(self) -> None:
+        self._api_key: str = ''
         self._mode: str = self.WALK_MODE
-        
-        self._count_requests: int = 0
-        self._count_requests_limit: Union[int, float] = requests_limit
-        
-    @property
-    def count_requests(self):
-        return self._count_requests
-        
-        
+
+class GoogleCoordinates(ICoordinates):
+    
+    def __init__(self) -> None:
+        self._google_maps: GoogleMapsApi = GoogleMapsApi()
+    
+    
     def get_coordinates(self, address: str) -> tuple:
         
-        if self._count_requests >= self._count_requests_limit:
+        if self._google_maps.count_requests >= self._google_maps.count_requests_limit:
             raise Exception("Requests limit")
 
         base_url = "https://maps.googleapis.com/maps/api/geocode/json"
         params = {
             "address": address,
-            "key": self._api_key
+            "key": self._google_maps._api_key
         }
         
         response = requests.get(base_url, params=params)
-        self._count_requests += 1
+        self._google_maps.count_requests += 1
         data = response.json()
         
         try:
@@ -46,8 +44,16 @@ class GoogleMapsApiData(IApiData):
             
         return (lat, lng, adrs)
     
+
+
+class GoogleMapsMatrixDistance(IApiData):
+    
+    def __init__(self) -> None:
+        self._google_maps: GoogleMapsApi = GoogleMapsApi()
+    
     
     def get_distances_matrix_path(self, terminal_coords, branch_coords_list):
+        
         closest_branch_id, closest_distance, closest_coords = None, float('inf'), None
         distances_matrix = self._get_distance_matrix(terminal_coords, [coord for _, coord in branch_coords_list])
         if distances_matrix is None:
@@ -74,6 +80,8 @@ class GoogleMapsApiData(IApiData):
         return closest_branch_id, closest_distance, closest_coords
 
     def _get_distance_matrix(self, terminal_coords, branch_coords_list):
+        if self._google_maps.count_requests >= self._google_maps.count_requests_limit:
+            raise Exception("Requests limit")
         
         origins = f"{terminal_coords[0]},{terminal_coords[1]}"
         destinations = "|".join([f"{coords[0]},{coords[1]}" for coords in branch_coords_list])
@@ -82,10 +90,10 @@ class GoogleMapsApiData(IApiData):
         params = {
             "origins": origins,
             "destinations": destinations,
-            "key": self._api_key,
-            "mode": self._mode
+            "key": self._google_maps._api_key,
+            "mode": self._google_maps.WALK_MODE
         }
-
+        self._google_maps.count_requests +=1
         response = requests.get(url, params=params)
         matrix_data = response.json()
 

@@ -175,7 +175,7 @@ class WorkClass(ClientClass):
         
         except Exception as e:
             print('_find_nearest: \n', e)
-            return None, None, {}, {}
+            return None, None, {}, {},[]
     
             
     def add_nearest_path_branch(self):
