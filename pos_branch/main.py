@@ -17,9 +17,9 @@ api_data_class = FreeSourceData()
 branches = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\branches_ukr.csv', sep=';', index_col=False)
 terminals = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\terminals_ukr.csv', sep=';', index_col=False, nrows=20)
 address_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\address_df.csv', sep=';', index_col=False)
-# nearest_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\nearest_df.csv', sep=';', index_col=False)
+nearest_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\nearest_df.csv', sep=';', index_col=False)
 # address_df = None
-nearest_df = None
+# nearest_df = None
 
 geo_data:GeoData = GeoData(api_data_class)
 workclass = WorkClass(clms=clms, branches=branches, terminals=terminals, geo_data=geo_data, addres_df=address_df, nearest_df=nearest_df)

@@ -63,16 +63,23 @@ class WorkClass(ClientClass):
         
         
     def _init_neares_df(self, nearest_df: pd.DataFrame | None = None) -> pd.DataFrame:
+        clms: CLMS = self.clms
+        
+        columns=[
+            clms.LAT(), clms.LNG(), clms.CLOSE_COORDINATES(), clms.CLOSEST_PATH_BRANCH(), clms.DISTANCE_PATH(), 
+            clms.CLOSEST_PATH_COORDINATES()]
         
         if nearest_df is None:
-            nearest_df = pd.DataFrame(columns=['lat', 'lng', 'close_coordinates', 'closest_path_branch', 'distance_path', 'closest_path_coordinates'])
+            nearest_df = pd.DataFrame(columns=columns)
         return nearest_df
         
     
     def _init_address_df(self, address_df: pd.DataFrame | None = None) -> pd.DataFrame:
+        clms: CLMS = self.clms
+        columns=[clms.ADDRESS(), clms.LAT(), clms.LNG(), clms.ADRS()]
         
         if address_df is None:
-            address_df = pd.DataFrame(columns=['address', 'lat', 'lng', 'adrs'])
+            address_df = pd.DataFrame(columns=columns)
         return address_df       
     
     @property
@@ -100,25 +107,27 @@ class WorkClass(ClientClass):
         return self._map
     
     def add_terminals_coordinates(self) -> None:
-        self._terminals[['lat', 'lng', 'adrs']] = (
+        clms: CLMS = self.clms
+        self._terminals[[clms.LAT(), clms.LNG(), clms.ADRS()]] = (
             self._terminals.apply(lambda x: pd.Series(self._add_coordinates(x)), axis=1)
             )
         
     def add_branches_coordinates(self) -> None:
-        self._branches[['lat', 'lng', 'adrs']] = (
+        clms: CLMS = self.clms
+        self._branches[[clms.LAT(), clms.LNG(), clms.ADRS()]] = (
             self._branches.apply(lambda x: pd.Series(self._add_coordinates(x)), axis=1)
             )
         
     def _add_coordinates(self, row: pd.Series): 
-        
-        address = str(row['address']).lower()
-        cache_condition = self._address_df['address'] == address
+        clms: CLMS = self.clms
+        address = str(row[clms.ADDRESS()]).lower()
+        cache_condition = self._address_df[clms.ADDRESS()] == address
         
         if cache_condition.any():
             cache_row = self._address_df[cache_condition].iloc[0]
-            lat = cache_row['lat']
-            lng = cache_row['lng']
-            adrs = cache_row['adrs']
+            lat = cache_row[clms.LAT()]
+            lng = cache_row[clms.LNG()]
+            adrs = cache_row[clms.ADRS()]
             
             self._coordinates_num += 1
             print(adrs,'\n', self._coordinates_num)
@@ -126,10 +135,10 @@ class WorkClass(ClientClass):
         
         lat, lng, adrs = self.geo_data.get_coordinates(address)
         new_cache_row = {
-            'address': address,
-            'lat': lat,
-            'lng': lng,
-            'adrs': adrs
+            clms.ADDRESS(): address,
+            clms.LAT(): lat,
+            clms.LNG(): lng,
+            clms.ADRS(): adrs
         }
         self._address_df = pd.concat([self._address_df, pd.DataFrame([new_cache_row])], ignore_index=True)
         self._coordinates_num += 1
@@ -138,14 +147,17 @@ class WorkClass(ClientClass):
         
         
     def add_nearest_branch(self, target_distance: int, target_branch_count: int):
-        self._terminals[['nearest_id', 'distance', 'close_points', 'close_coordinates', 'nearest_coord']] = (
+        clms: CLMS = self.clms
+        self._terminals[
+            [ clms.NEAREST_ID(), clms.DISTANCE(), clms.CLOSE_POINTS(), clms.CLOSE_COORDINATES(), clms.NEAREST_COORD()]] = (
             self._terminals.apply(lambda row: pd.Series(self._find_nearest(row, target_distance, target_branch_count), dtype='str'), axis=1)
             )
         
     def _find_nearest(self, point: pd.Series, target_distance: int, target_branch_count: int):
+        clms: CLMS = self.clms
         try:
             candidates = self._branches
-            distances = candidates.apply(lambda row: self.geo_data.haversine(point['lat'], point['lng'], row['lat'], row['lng']), axis=1)
+            distances = candidates.apply(lambda row: self.geo_data.haversine(point[clms.LAT()], point[clms.LNG()], row['lat'], row['lng']), axis=1)
             min_idx = distances.idxmin()
             nearest_id = candidates.loc[min_idx, 'num']
             nearest_distance = distances[min_idx]
@@ -167,19 +179,21 @@ class WorkClass(ClientClass):
     
             
     def add_nearest_path_branch(self):
+        clms: CLMS = self.clms
         self._nearest_df
-        self._terminals[['closest_path_branch', 'distance_path', 'closest_path_coordinates']] = (
+        self._terminals[[clms.CLOSEST_PATH_BRANCH(), clms.DISTANCE_PATH(), clms.CLOSEST_PATH_COORDINATES()]] = (
             self._terminals.apply(lambda row: pd.Series(self._add_nearest_path_branch(row)), axis=1)
             )
     
             
     def _add_nearest_path_branch(self, row): 
-        
+        clms: CLMS = self.clms
         self._nearest_path_num += 1
         
         cache_condition = (
-            (self._nearest_df['lat'].astype(str) == str(row['lat'])) & (self._nearest_df['lng'].astype(str) == str(row['lng'])) & 
-            (self._nearest_df['close_coordinates'].astype(str) == str(row['close_coordinates']))
+            (self._nearest_df[clms.LAT()].astype(str) == str(row[clms.LAT()])) & 
+            (self._nearest_df[clms.LNG()].astype(str) == str(row[clms.LNG()])) & 
+            (self._nearest_df[clms.CLOSE_COORDINATES()].astype(str) == str(row[clms.CLOSE_COORDINATES()]))
             )
         
         if cache_condition.any():
@@ -215,13 +229,14 @@ class WorkClass(ClientClass):
         return values
     
     def finalize_columns(self):
+        clms: CLMS = self.clms
         self._terminals = pd.merge(self.terminals, self.branches, left_on="nearest_id", right_on="num",  how="left", suffixes=("", "_branch"))
         self._terminals['tech_num'] = '1'
         print(self.terminals.columns)
     
     
     def visualize_branches_and_terminals(self, closest_coordinates:str = 'closest_path_coordinates'):
-
+        clms: CLMS = self.clms
         # Центр карти — середні координати всіх точок
         avg_lat = (self.branches["lat"].mean() + self.terminals["lat"].mean()) / 2
         avg_lng = (self.branches["lng"].mean() + self.terminals["lng"].mean()) / 2

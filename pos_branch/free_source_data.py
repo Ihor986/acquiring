@@ -61,8 +61,8 @@ class FreeSourceData(IApiData):
         #     ] 
                 
         # combined_graph = nx.compose_all(graphs)
-        return ox.load_graphml(filepath="D:\\резюме\\райф\\acquiring_data\\graphml\\Dnipropetrovsk_Oblast_graph.graphml") # None #combined_graph
-
+        # return ox.load_graphml(filepath="D:\\резюме\\райф\\acquiring_data\\graphml\\Dnipropetrovsk_Oblast_graph.graphml") # None #combined_graph
+        return None
         
         
      # Функція для отримання координат
@@ -78,33 +78,33 @@ class FreeSourceData(IApiData):
         
     def get_distances_matrix_path(self, term_coord, branch_coords):
         closest_branch_id, closest_distance, closest_coords = None, float('inf'), None
-        try:
-            term_node = ox.nearest_nodes(self._city_graph, term_coord[1], term_coord[0])
-            print(term_node)
+        # try:
+        #     term_node = ox.nearest_nodes(self._city_graph, term_coord[1], term_coord[0])
+        #     print(term_node)
             
-            branch_ids = [branch_id for branch_id, _ in branch_coords]
-            branch_coords_list = [(coord[1], coord[0]) for _, coord in branch_coords]  # Змінюємо порядок для функції
-            nearest_nodes = self._get_nearest_nodes(self._city_graph, branch_coords_list)# ox.nearest_nodes(self._city_graph, X=[coord[0] for coord in branch_coords_list], Y=[coord[1] for coord in branch_coords_list])
-            branch_nodes = [(nearest_nodes[i], branch_ids[i], branch_coords[i][1]) for i in range(len(branch_ids))]
-            distances = {}
-            branch_coords_map = {}
+        #     branch_ids = [branch_id for branch_id, _ in branch_coords]
+        #     branch_coords_list = [(coord[1], coord[0]) for _, coord in branch_coords]  # Змінюємо порядок для функції
+        #     nearest_nodes = self._get_nearest_nodes(self._city_graph, branch_coords_list)# ox.nearest_nodes(self._city_graph, X=[coord[0] for coord in branch_coords_list], Y=[coord[1] for coord in branch_coords_list])
+        #     branch_nodes = [(nearest_nodes[i], branch_ids[i], branch_coords[i][1]) for i in range(len(branch_ids))]
+        #     distances = {}
+        #     branch_coords_map = {}
             
-            all_distances = nx.single_source_dijkstra_path_length(self._city_graph, term_node, weight="length")
-            for branch_node, branch_id, coord in branch_nodes:
-                distance_value = all_distances.get(branch_node, float('inf'))
-                distances[branch_id] = distance_value
-                branch_coords_map[branch_id] = coord
+        #     all_distances = nx.single_source_dijkstra_path_length(self._city_graph, term_node, weight="length")
+        #     for branch_node, branch_id, coord in branch_nodes:
+        #         distance_value = all_distances.get(branch_node, float('inf'))
+        #         distances[branch_id] = distance_value
+        #         branch_coords_map[branch_id] = coord
 
-            if distances:
-                closest_branch_id = min(distances, key=lambda x: distances[x])
-                closest_distance = distances[closest_branch_id]
-                closest_coords = branch_coords_map[closest_branch_id]
+        #     if distances:
+        #         closest_branch_id = min(distances, key=lambda x: distances[x])
+        #         closest_distance = distances[closest_branch_id]
+        #         closest_coords = branch_coords_map[closest_branch_id]
                 
-            return closest_branch_id, closest_distance, closest_coords
+        #     return closest_branch_id, closest_distance, closest_coords
         
-        except Exception as e:
-            print(f"Помилка: {e}")
-            return closest_branch_id, closest_distance, closest_coords
+        # except Exception as e:
+        #     print(f"Помилка: {e}")
+        #     return closest_branch_id, closest_distance, closest_coords
         
         
     def _get_nearest_nodes(self, city_graph, branch_coords_list):
