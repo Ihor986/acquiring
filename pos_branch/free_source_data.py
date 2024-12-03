@@ -5,7 +5,7 @@ from geopy.geocoders import Nominatim
 from geopy.location import Location
 import osmnx as ox
 import networkx as nx
-from pos_branch.models.i_data_class import IApiData
+from models.i_data_class import IApiData
 import matplotlib.pyplot as plt
 import json
 import pandas as pd

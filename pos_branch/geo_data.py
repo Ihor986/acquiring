@@ -1,5 +1,5 @@
 import math
-from pos_branch.models.i_data_class import IApiData
+from models.i_data_class import IApiData
 
 class GeoData:
     
