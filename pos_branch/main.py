@@ -1,5 +1,5 @@
 from geo_data import GeoData
-from work_class import WorkClass
+from work_class import WorkClass, CLMS
 import pandas as pd
 from google_data import GoogleMapsApiData
 from free_source_data import FreeSourceData
@@ -8,7 +8,7 @@ import time
 
 start = datetime.now()
 print(f'start: {start.strftime("%X")}')
-
+clms = CLMS()
 # api_data_class = GoogleMapsApiData()
 api_data_class = FreeSourceData()
 
@@ -17,12 +17,12 @@ api_data_class = FreeSourceData()
 branches = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\branches_ukr.csv', sep=';', index_col=False)
 terminals = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\terminals_ukr.csv', sep=';', index_col=False, nrows=20)
 address_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\address_df.csv', sep=';', index_col=False)
-nearest_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\nearest_df.csv', sep=';', index_col=False)
+# nearest_df = pd.read_csv('D:\\резюме\\райф\\acquiring_data\\input_csv\\nearest_df.csv', sep=';', index_col=False)
 # address_df = None
-# nearest_df = None
+nearest_df = None
 
 geo_data:GeoData = GeoData(api_data_class)
-workclass = WorkClass(branches=branches, terminals=terminals, geo_data=geo_data, addres_df=address_df, nearest_df=nearest_df)
+workclass = WorkClass(clms=clms, branches=branches, terminals=terminals, geo_data=geo_data, addres_df=address_df, nearest_df=nearest_df)
 
 workclass.add_branches_coordinates()
 workclass.add_terminals_coordinates()
@@ -30,8 +30,8 @@ workclass.add_nearest_branch(100, 10)
 workclass.add_nearest_path_branch()
 workclass.visualize_branches_and_terminals()
 
-# workclass.map.save('D:\\резюме\\райф\\acquiring_data\\result\\html\\my_map_test.html')
-# workclass.terminals.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\csv\\terminals_test.csv', sep=';', index=False)
+workclass.map.save('D:\\резюме\\райф\\acquiring_data\\result\\html\\my_map_test.html')
+workclass.terminals.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\csv\\terminals_test.csv', sep=';', index=False)
 # workclass.address_df.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\csv\\address_df_test.csv', sep=';', index=False)
 # workclass.nearest_df.to_csv('D:\\резюме\\райф\\acquiring_data\\result\\csv\\nearest_df_test.csv', sep=';', index=False)
 
@@ -43,65 +43,6 @@ print(workclass.terminals)
 count_google_requests = api_data_class.count_requests if isinstance(api_data_class, GoogleMapsApiData) else 0
 print(f'{count_google_requests=}')
 print((datetime.now()-start))
-
-
-
-
-
-# from geo_data import GeoData
-# from work_class import WorkClass
-# import pandas as pd
-# from google_data import GoogleMapsApiData
-# from free_source_data import FreeSourceData
-# from datetime import datetime
-
-# start = datetime.now()
-
-# print(f'{start=}')
-# branches = pd.read_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\branches_zhytomyr_co.csv', sep=';')
-# terminals = pd.read_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\terminals_zhytomyr_co.csv', sep=';')
-# address_df = pd.read_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\address_df.csv', sep=';')
-# print(terminals)
-# api_data_class = GoogleMapsApiData(GoogleMapsApiData.WALK_MODE)
-# # api_data_class = FreeSourceData('Житомир, Україна', FreeSourceData.WALK_MODE)
-# print('api_data_class', ' ...')
-
-# geo_data:GeoData = GeoData(api_data_class)
-# print('geo_data', ' ...')
-
-# workclass = WorkClass(branches=branches, terminals=terminals, geo_data=geo_data, addres_df=address_df)
-# print('coordinates', ' ...')
-
-# # workclass.add_branches_coordinates()
-# # workclass.add_terminals_coordinates()
-
-# # workclass.branches.to_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\branches_zhytomyr_co.csv', sep=';')
-# # workclass.terminals.to_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\terminals_zhytomyr_co.csv', sep=';')
-# # workclass.address_df.to_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\address_df.csv', sep=';')
-
-# print('add_nearest_branch', ' ...')
-# workclass.add_nearest_branch(100, 10)
-
-# print(workclass.terminals)
-
-# print('add_nearest_path_branch', ' ...')
-# workclass.add_nearest_path_branch()
-
-# print('print', ' ...')
-# workclass.visualize_branches_and_terminals()
-
-# terminals.to_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\terminals_google_zhytomyr_walk.csv', sep=';')
-# # terminals.to_csv('D:\\резюме\\райф\\testSpark\\pos_branch\\terminals_free_zhytomyr_walk.csv', sep=';')
-
-# # workclass.map.save('my_map_free_zhytomyr_walk.html')
-# workclass.map.save('my_map_google_zhytomyr_walk.html')
-
-# # print(workclass.branches)
-# print(workclass.terminals)
-# finish = datetime.now()
-# print(finish-start)
-
-
 
 
 

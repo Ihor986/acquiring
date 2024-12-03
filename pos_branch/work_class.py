@@ -1,22 +1,55 @@
 from typing import Optional
 from geo_data import GeoData
+from models.client_pd_class import ClientClass, CustomPDColumns, CustomPDColumn
 import pandas as pd
 import folium
 import ast
 import time
 import json
 
-class WorkClass:
+class CLMS(CustomPDColumns):
+    CITY = CustomPDColumn(sours_name='city', sours_type=str) 
+    ADDRESS = CustomPDColumn(sours_name='address', sours_type=str) 
+    SERIALNUMBER = CustomPDColumn(sours_name='serialnumber', sours_type=str) 
+    TERMINALID = CustomPDColumn(sours_name='terminalid', sours_type=str) 
+    LAT = CustomPDColumn(sours_name='lat', sours_type=float) 
+    LNG = CustomPDColumn(sours_name='lng', sours_type=float) 
+    ADRS = CustomPDColumn(sours_name='adrs', sours_type=str) 
+    NEAREST_ID = CustomPDColumn(sours_name='nearest_id', sours_type=str) 
+    DISTANCE = CustomPDColumn(sours_name='distance', sours_type=float) 
+    NEAREST_COORD = CustomPDColumn(sours_name='nearest_coord', sours_type=list) 
+    CLOSE_POINTS = CustomPDColumn(sours_name='close_points', sours_type=dict) 
+    CLOSE_COORDINATES = CustomPDColumn(sours_name='close_coordinates', sours_type=dict) 
+    CLOSEST_PATH_BRANCH = CustomPDColumn(sours_name='closest_path_branch', sours_type=str) 
+    DISTANCE_PATH = CustomPDColumn(sours_name='distance_path', sours_type=float) 
+    CLOSEST_PATH_COORDINATES = CustomPDColumn(sours_name='closest_path_coordinates', sours_type=dict) 
+    NUM_BRANCH = CustomPDColumn(sours_name='num_branch', sours_type=str) 
+    CITY_BRANCH = CustomPDColumn(sours_name='city_branch', sours_type=str) 
+    ADDRESS_BRANCH = CustomPDColumn(sours_name='address_branch', sours_type=str) 
+    NAME = CustomPDColumn(sours_name='name', sours_type=str) 
+    LAT_BRANCH = CustomPDColumn(sours_name='lat_branch', sours_type=float) 
+    LNG_BRANCH = CustomPDColumn(sours_name='lng_branch', sours_type=float) 
+    ADRS_BRANCH = CustomPDColumn(sours_name='adrs_branch', sours_type=str) 
+    TECH_NUM = CustomPDColumn(sours_name='tech_num', sours_type=int) 
+
+
+
+
+class WorkClass(ClientClass):
     
     def __init__(
         self, 
-        branches, 
-        terminals, 
-        geo_data, 
+        clms: CustomPDColumns,
+        branches: pd.DataFrame, 
+        terminals: pd.DataFrame, 
+        geo_data: GeoData, 
         addres_df: Optional[pd.DataFrame] = None, 
         nearest_df: Optional[pd.DataFrame] = None
         ) -> None:
+        
         print('__init__ WorkClass ... ')
+        super().__init__(clms, terminals)
+        
         self.start_time = time.time()
         self._nearest_path_num: int = 0
         self._coordinates_num: int = 0
@@ -105,7 +138,7 @@ class WorkClass:
         
         
     def add_nearest_branch(self, target_distance: int, target_branch_count: int):
-        self._terminals[['nearest_id', 'distance', 'nearest_coord', 'close_points', 'close_coordinates']] = (
+        self._terminals[['nearest_id', 'distance', 'close_points', 'close_coordinates', 'nearest_coord']] = (
             self._terminals.apply(lambda row: pd.Series(self._find_nearest(row, target_distance, target_branch_count), dtype='str'), axis=1)
             )
         
